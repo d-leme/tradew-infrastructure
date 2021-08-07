@@ -1,0 +1,32 @@
+# info about container and image to be deployed
+container:
+  repository:
+  image:
+  tag:
+  port:
+
+# health check configuration
+health:
+  path:
+  port:
+  initialDelaySeconds:
+  periodSeconds:
+
+# rolling update strategy configuration
+strategy:
+  maxSurge:
+  maxUnavailable:
+
+# horizontal scalling configuration
+hpa:
+  minReplicas:
+  maxReplicas:
+
+# service configuration
+service:
+  type:
+  port:
+  targetPort:
+  protocol:
+
+configmap:

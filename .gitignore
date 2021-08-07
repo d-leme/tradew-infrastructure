@@ -1,0 +1,14 @@
+.vscode
+
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+*.out
+
+*.zip
+*.tfvars
+
+.terraform

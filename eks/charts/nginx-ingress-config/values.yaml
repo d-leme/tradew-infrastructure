@@ -1,0 +1,16 @@
+http:
+  namespace: default
+  host: a668becf2d07444528bc972d9e05f90a-1183669805.us-west-2.elb.amazonaws.com
+  backends:
+    - serviceName: users-http
+      servicePort: 80
+      path: /
+    # - serviceName: inventory-write-http
+    #   servicePort: 80
+    #   path: /
+    # - serviceName: inventory-read-http
+    #   servicePort: 80
+    #   path: /
+    # - serviceName: trades-http
+    #   servicePort: 80
+    #   path: /

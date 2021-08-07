@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  annotations:
+    keel.sh/policy: all
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 1m"
+    helm.sh/resource-policy: keep
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-http
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.strategy.maxSurge }}
+      maxUnavailable: {{ .Values.strategy.maxUnavailable }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-http
+    spec:
+      volumes:
+        - name: {{ .Release.Name }}
+          configMap:
+            name: {{ .Release.Name }}
+      containers:
+        - name: {{ .Release.Name }}-http
+          image: {{ .Values.container.repository }}/{{ .Values.container.image }}:{{ .Values.container.tag }}
+          imagePullPolicy: {{ .Values.container.pullPolicy }}
+          args:
+            - api
+            - --settings=/settings/config.yaml
+          ports:
+            - containerPort: {{ .Values.container.port }}
+              name: http
+          env:
+            - name: AWS_CREDENTIALS
+              value: /.aws/credentials
+          resources:
+{{ .Values.resources | toYaml | indent 12 }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.health.path }}
+              port: {{ .Values.health.port }}
+            initialDelaySeconds: {{ .Values.health.initialDelay }}
+            periodSeconds: {{ .Values.health.periodSeconds }}
+          volumeMounts:
+          {{ if .Values.configmap }}
+            - name: {{ .Release.Name }}
+              mountPath: /settings
+              readOnly: true
+          {{ end }}
+            - name: aws-credentials
+              mountPath: /.aws
+      volumes:
+      {{ if .Values.configmap }}
+      - name: {{ .Release.Name }}
+        configMap:
+          name: {{ .Release.Name }}
+      {{ end }}
+      - name: aws-credentials
+        secret:
+            secretName: {{ .Release.Name }}-application-credentials

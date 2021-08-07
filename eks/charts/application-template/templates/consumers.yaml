@@ -1,0 +1,85 @@
+{{- if .Values.consumer.enabled }}
+{{- $root := . -}}
+{{- range .Values.consumer.consumers }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $root.Release.Name }}-{{ .command }}
+  annotations:
+    keel.sh/policy: all
+    keel.sh/trigger: poll
+    keel.sh/pollSchedule: "@every 1m"
+    helm.sh/resource-policy: keep
+    helm.sh/hook: pre-install,pre-upgrade
+spec:
+  selector:
+    matchLabels:
+      app: {{ $root.Release.Name }}-{{ .command }}
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 50%
+  template:
+    metadata:
+      labels:
+        app: {{ $root.Release.Name }}-{{ .command }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: {{ $root.Release.Name }}-{{ .command }}
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: {{ $root.Release.Name }}-{{ .command }}
+          securityContext:
+            privileged: true
+          image: {{ $root.Values.container.repository }}/{{ $root.Values.container.image }}:{{ $root.Values.container.tag }}
+          imagePullPolicy: Always
+          args:
+            - consumers
+            - {{ .command }}
+            - --settings=/settings/config.yaml
+          env:
+            - name: AWS_CREDENTIALS
+              value: /.aws/credentials
+          resources:
+{{ $root.Values.resources | toYaml | indent 12 }}
+          volumeMounts:
+          {{ if $root.Values.configmap }}
+            - name: {{ $root.Release.Name }}
+              mountPath: /settings
+              readOnly: true
+          {{ end }}
+            - name: aws-credentials
+              mountPath: /.aws
+      volumes:
+      {{ if $root.Values.configmap }}
+      - name: {{ $root.Release.Name }}
+        configMap:
+          name: {{ $root.Release.Name }}
+      {{ end }}
+      - name: aws-credentials
+        secret:
+            secretName: {{ $root.Release.Name }}-application-credentials
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ $root.Release.Name }}-{{ .command }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ $root.Release.Name }}-{{ .command }}
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+{{- end }}
+{{- end }}
