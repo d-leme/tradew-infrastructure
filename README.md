@@ -1,5 +1,7 @@
 # Tradew Infrastructure
 
+<div align="center"><img src="docs/logo.png" alt="logo" width="300"/></div>
+
 ## Overview
 This project is responsible for provinding the system infrastructure as code, it creates:
  - A VPC
