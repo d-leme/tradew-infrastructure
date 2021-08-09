@@ -112,67 +112,67 @@ resource "helm_release" "inventory-read" {
   ]
 }
 
-# resource "helm_release" "trades" {
-#   name          = "trades"
-#   chart         = "./eks/charts/application-template"
-#   max_history   = 3
-#   recreate_pods = true
-#   force_update  = true
+resource "helm_release" "trades" {
+  name          = "trades"
+  chart         = "./eks/charts/application-template"
+  max_history   = 3
+  recreate_pods = true
+  force_update  = true
 
-#   depends_on = [
-#     aws_eks_node_group.main-node-group
-#   ]
+  depends_on = [
+    aws_eks_node_group.main-node-group
+  ]
 
-#   values = [
-#     "${file("./applications/trades-values.yaml")}"
-#   ]
-# }
+  values = [
+    "${file("./applications/trades-values.yaml")}"
+  ]
+}
 
-# resource "helm_release" "nginx-ingress" {
-#   name          = "nginx-ingress"
-#   repository    = "https://helm.nginx.com/stable"
-#   chart         = "nginx-ingress"
-#   recreate_pods = true
-#   force_update  = true
+resource "helm_release" "nginx-ingress" {
+  name          = "nginx-ingress"
+  repository    = "https://helm.nginx.com/stable"
+  chart         = "nginx-ingress"
+  recreate_pods = true
+  force_update  = true
 
-#   depends_on = [
-#     aws_eks_node_group.main-node-group
-#   ]
-# }
+  depends_on = [
+    aws_eks_node_group.main-node-group
+  ]
+}
 
-# resource "kubernetes_namespace" "keel-namespace" {
-#   metadata {
-#     name = "keel"
-#   }
+resource "kubernetes_namespace" "keel-namespace" {
+  metadata {
+    name = "keel"
+  }
 
-#   depends_on = [
-#     aws_eks_node_group.main-node-group
-#   ]
-# }
+  depends_on = [
+    aws_eks_node_group.main-node-group
+  ]
+}
 
 
-# resource "helm_release" "keel" {
-#   name          = "keel"
-#   repository    = "https://charts.keel.sh"
-#   chart         = "keel"
-#   namespace     = "keel"
-#   recreate_pods = true
-#   force_update  = true
+resource "helm_release" "keel" {
+  name          = "keel"
+  repository    = "https://charts.keel.sh"
+  chart         = "keel"
+  namespace     = "keel"
+  recreate_pods = true
+  force_update  = true
 
-#   depends_on = [
-#     aws_eks_node_group.main-node-group,
-#     kubernetes_namespace.keel-namespace,
-#   ]
-# }
+  depends_on = [
+    aws_eks_node_group.main-node-group,
+    kubernetes_namespace.keel-namespace,
+  ]
+}
 
-# resource "helm_release" "nginx-ingress-config" {
-#   name          = "nginx-ingress-config"
-#   chart         = "./charts/nginx-ingress-config"
-#   max_history   = 3
-#   recreate_pods = true
-#   force_update  = true
+resource "helm_release" "nginx-ingress-config" {
+  name          = "nginx-ingress-config"
+  chart         = "./charts/nginx-ingress-config"
+  max_history   = 3
+  recreate_pods = true
+  force_update  = true
 
-#   depends_on = [
-#     aws_eks_node_group.main-node-group
-#   ]
-# }
+  depends_on = [
+    aws_eks_node_group.main-node-group
+  ]
+}
