@@ -10,5 +10,6 @@
 
 *.zip
 *.tfvars
+!*template.tfvars
 
 .terraform
